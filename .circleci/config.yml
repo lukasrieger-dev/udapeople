@@ -9,6 +9,11 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
+          name: Update dependencies front-end
+          command: |
+            cd frontend
+            npm install
+      - run:
           name: Build front-end
           command: |
             cd frontend
@@ -24,6 +29,11 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
+      - run:
+          name: Update dependencies back-end
+          command: |
+            cd backend
+            npm install
       - run:
           name: Back-end build
           command: |
@@ -59,6 +69,23 @@ jobs:
             cd backend
             npm run test
 
+  scan-frontend:
+    docker:
+      # Docker image here
+    steps:
+      # Checkout code from git
+      # Restore from cache
+      # Your job code here
+
+  scan-backend:
+    docker:
+      # Docker image here
+    steps:
+      # Checkout code from git
+      # Restore from cache
+      # Your job code here
+
+
 workflows:
   default:
     jobs:
@@ -68,3 +95,7 @@ workflows:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
