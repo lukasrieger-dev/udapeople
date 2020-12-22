@@ -77,6 +77,11 @@ jobs:
       - restore_cache:
           keys: [frontend-build-upd]
       - run:
+          name: Update dependencies
+          command: |
+            cd frontend
+            npm install
+      - run:
           name: Analyze front-end
           command: |
             cd frontend
