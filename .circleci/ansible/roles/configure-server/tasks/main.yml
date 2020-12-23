@@ -31,7 +31,7 @@
 
 - name: "copy files from CircleCI to server"
   copy:
-    src: udapeople/backend
+    src: /root/udapeople/backend
     dest: /home/ubuntu
 
 - name: "install package dependencies"

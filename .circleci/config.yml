@@ -156,10 +156,11 @@ jobs:
             echo "[web]" > ./inventory.txt
             echo ${BACKEND_URL} >> ./inventory.txt
             cat ./inventory.txt
+            pwd
       - persist_to_workspace:
           root: ~/
           paths:
-            - udapeople/.circleci/ansible/inventory.txt
+            - udapeople
       - destroy-environment:
           WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -179,6 +180,8 @@ jobs:
       - run:
           name: Configure server
           command: |
+            pwd
+            ls
             cd udapeople/.circleci/ansible/
             ansible-playbook -i inventory.txt configure-server.yml
           environment:
