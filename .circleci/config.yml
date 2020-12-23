@@ -11,8 +11,24 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.WorkflowID >>
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.WorkflowID >>
+            aws cloudformation delete-stack --stack-name udapeople-backend-<<parameters.WorkflowID>>
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.WorkflowID>>
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
+
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    steps:
+      - run:
+          name: Revert migrations
+          command: |
+            SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/migration)
+            if(( $SUCCESS==1 )); 
+            then
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
+            fi
+          when: on_fail
 
 jobs:
   build-frontend:
@@ -240,11 +256,42 @@ jobs:
             curl -H "Content-Type: text/plain" \
             -H "token: migration_${CIRCLE_WORKFLOW_ID:0:7}" \
             --request PUT \
-            --data ${RESULT} https://api.memstash.io/values/backend_url
+            --data ${RESULT} https://api.memstash.io/values/migration
             
             echo ${RESULT}
       #- destroy-environment:
          # WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      #-revert-migrations
+
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            yum -y install nodejs
+            yum -y install tar gzip
+      - run:
+          name: Get backend url
+          command: |
+            BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            cat .env
+            ls -la
+            aws s3 sync dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations
 
 workflows:
   default:
@@ -268,3 +315,5 @@ workflows:
           #requires: [deploy-infrastructure]
       - run-migrations #:
           #requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
