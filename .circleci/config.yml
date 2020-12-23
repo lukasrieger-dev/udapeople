@@ -128,15 +128,15 @@ jobs:
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run: 
-          name: Store EC2 DNS-Name in Memstash
+          name: Store Backend URL in Memstash
           command: |
             BACKEND_URL=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --filters 'Name=tag:Name,Values=udapeople-backend-ec2-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            echo "BACKEND URL:"
             echo ${BACKEND_URL}
             curl -H "Content-Type: text/plain" \
                -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
                --request PUT \
-               --data ${BACKEND_URL} \
-               https://api.memstash.io/values/public_dns
+               --data ${BACKEND_URL} https://api.memstash.io/values/backend_url
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -148,7 +148,7 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
             echo ${BACKEND_URL}
             cd .circleci/ansible/
             echo "[all]" > ./inventory.txt
@@ -158,6 +158,26 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
+      - destroy-environment:
+          WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - add_ssh_keys:
+          fingerprints: [17:43:4d:52:04:8b:2b:7d:7e:23:2d:fa:b7:ce:7d:ff]
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+            ansible-playbook -i ~/inventory.txt configure-server.yml
       - destroy-environment:
           WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
