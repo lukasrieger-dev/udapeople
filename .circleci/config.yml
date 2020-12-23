@@ -276,7 +276,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yum -y install nodejs
             yum -y install tar gzip
       - run:
           name: Get backend url
@@ -294,9 +293,9 @@ jobs:
             cat .env
             ls -la
             aws s3 sync dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+      #- destroy-environment:
+          #WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      #- revert-migrations
 
   deploy-backend:
     docker:
@@ -319,9 +318,9 @@ jobs:
             tar -C backend -czvf artifact.tar.gz .
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+      #- destroy-environment:
+         # WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      #- revert-migrations
 
   smoke-test:
     docker:
@@ -375,9 +374,9 @@ jobs:
               --stack-name udapeople-cloudfront \
               --parameter-overrides WorkflowID=${CIRCLE_WORKFLOW_ID:0:7} \
               --tags project=udapeople
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+      #- destroy-environment:
+          #WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      #- revert-migrations
 
   cleanup:
      docker:
@@ -401,9 +400,9 @@ jobs:
             else
               echo "no destroy"
             fi
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+      #- destroy-environment:
+          #WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      #- revert-migrations
 
 workflows:
   default:
