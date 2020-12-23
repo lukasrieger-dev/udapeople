@@ -263,7 +263,7 @@ jobs:
             echo ${RESULT}
       - destroy-environment:
           WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      -revert-migrations
+      - revert-migrations
 
   deploy-frontend:
     docker:
