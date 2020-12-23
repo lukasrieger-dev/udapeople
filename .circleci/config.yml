@@ -160,7 +160,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - udapeople
+            - /root
       - destroy-environment:
           WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -182,7 +182,7 @@ jobs:
           command: |
             pwd
             ls
-            cd udapeople/.circleci/ansible/
+            cd /root/project/.circleci/ansible/
             ansible-playbook -i inventory.txt configure-server.yml
           environment:
             ANSIBLE_HOST_KEY_CHECKING: false
