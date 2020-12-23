@@ -274,10 +274,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
-          command: |
-            yum -y install tar gzip
-      - run:
           name: Install AWS-CLI
           command: |
             sudo apt-get -y -qq update
