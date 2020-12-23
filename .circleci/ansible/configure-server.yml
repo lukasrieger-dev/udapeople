@@ -23,8 +23,8 @@
     #- name: "wait 600 seconds for target connection to become reachable/usable."
       #raw: sleep 600
 
-    - name: "install python for Ansible."
-      raw: yum -y install python
+   # - name: "install python for Ansible."
+      #raw: yum -y install python
 
   roles:
     - configure-server
