@@ -381,7 +381,7 @@ jobs:
       - image: amazon/aws-cli
      steps:
       - checkout
-      - jq/install
+      #- jq/install
       - run:
           name: Get old stack workflow id
           command: |
