@@ -126,7 +126,17 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=Udapeople \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: 
+          name: Store EC2 DNS-Name in Memstash
+          command: |
+            BACKEND_URL=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --filters 'Name=tag:Name,Values=udapeople-backend-ec2-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            echo ${BACKEND_URL}
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" \
+               --request PUT \
+               --data ${BACKEND_URL} \
+               https://api.memstash.io/values/public_dns
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -138,14 +148,18 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Your code here
-            exit 1
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            echo ${BACKEND_URL}
+            cd .circleci/ansible/
+            echo "[all]" > ./inventory.txt
+            echo ${BACKEND_URL} >> ./inventory.txt
+            cat ./inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      #- destroy-environment:
-          #WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          WorkflowID: "${CIRCLE_WORKFLOW_ID:0:7}"
 
 workflows:
   default:
