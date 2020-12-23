@@ -283,8 +283,8 @@ jobs:
           name: Get backend url
           command: |
             BACKEND_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            export API_URL=http://${BACKEND_IP}:3030
+            echo ${API_URL}
       - run:
           name: Deploy frontend objects
           command: |
@@ -320,6 +320,10 @@ jobs:
           name: Deploy backend
           no_output_timeout: 30m
           command: |
+            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
+            cd .circleci/ansible/
+            echo "[web]" > ./inventory.txt
+            echo ${BACKEND_URL} >> ./inventory.txt
             tar -C backend -czvf artifact.tar.gz .
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
