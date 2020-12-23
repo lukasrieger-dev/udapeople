@@ -151,12 +151,10 @@ jobs:
             yum install tar -y
             yum install gzip -y 
             BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
-            echo ${BACKEND_URL}
             cd .circleci/ansible/
             echo "[web]" > ./inventory.txt
             echo ${BACKEND_URL} >> ./inventory.txt
             cat ./inventory.txt
-            pwd
       - persist_to_workspace:
           root: ~/
           paths:
@@ -182,7 +180,7 @@ jobs:
           command: |
             pwd
             ls
-            cd project/.circleci/ansible/
+            cd .circleci/ansible/
             ansible-playbook -i inventory.txt configure-server.yml
           environment:
             ANSIBLE_HOST_KEY_CHECKING: false
