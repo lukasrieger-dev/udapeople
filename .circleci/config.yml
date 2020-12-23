@@ -196,6 +196,10 @@ jobs:
           command: |
             pip install awscli
       - run:
+          name: Install OpenSSH
+          command: |
+            apk add openssh-client
+      - run:
           name: Configure server
           no_output_timeout: 15m
           command: |
