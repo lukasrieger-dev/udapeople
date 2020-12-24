@@ -358,7 +358,6 @@ jobs:
             BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
             echo ${BACKEND_URL}
             curl "http://${BACKEND_URL}:3030/api/status"
-            exit 1
       - run:
           name: Frontend smoke test.
           command: |
