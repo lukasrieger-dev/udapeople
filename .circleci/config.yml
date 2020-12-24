@@ -21,7 +21,7 @@ commands:
       - run:
           name: Revert migrations
           command: |
-            SUCCESS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/migration)
+            SUCCESS=$(curl -H "token: migration_${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/migration)
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -318,7 +318,7 @@ jobs:
             apk add openssh-client
       - run:
           name: Deploy backend
-          no_output_timeout: 30m
+          no_output_timeout: 15m
           command: |
             tar -C backend -czvf artifact.tar.gz .
             cd .circleci/ansible
@@ -345,23 +345,20 @@ jobs:
             BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
             echo ${BACKEND_URL}
             curl "http://${BACKEND_URL}:3030/api/status"
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+            exit 1
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3.website.eu-west-2.amazonaws.com"
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3.website.eu-central-1.amazonaws.com"
             if curl -s ${URL} | grep "Welcome"
             then
-              echo "1"
+              return 1
             else
-              echo "0"
+              return 0
             fi
-            exit 1
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+      #- destroy-environment:
+          #WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      #- revert-migrations
 
   cloudfront-update:
     docker:
