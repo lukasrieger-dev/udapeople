@@ -1,15 +1,20 @@
 ---
-#- name: "copy files from CircleCI to server"
-  #become: true
-  #copy:
-    #src: /root/project/backend
-    #dest: /home/ubuntu
+- name: "copy files from CircleCI to server"
+  become: true
+  copy:
+    src: /root/project/backend
+    dest: /home/ubuntu
 
-#- name: "install package dependencies"
-  #become: true
-  #shell: |
-    #cd /home/ubuntu/backend    
-    #npm install
+- name: "install package dependencies"
+  become: true
+  shell: |
+    cd /home/ubuntu/backend    
+    npm install
+
+- name: "build package"
+  shell: |
+    cd /home/ubuntu/backend
+    npm run build
 
 - name: run server
   become: true

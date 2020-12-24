@@ -229,18 +229,6 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-
-            echo ENVIROMENT=production > ".env"
-            echo TYPEORM_CONNECTION=postgres >> ".env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> ".env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
-
             npm install
             npm audit fix --audit-level=critical --force
             npm run migrations > migration_${CIRCLE_WORKFLOW_ID:0:7}.txt
@@ -334,8 +322,6 @@ jobs:
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
             cd .circleci/ansible
-            echo "[web]" > inventory.txt
-            echo "ec2-18-197-144-251.eu-central-1.compute.amazonaws.com" >> inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
           environment:
             ANSIBLE_HOST_KEY_CHECKING: false
@@ -427,31 +413,31 @@ jobs:
 workflows:
   default:
     jobs:
-    #  - build-frontend
-    #  - build-backend
-    #  - test-frontend:
-    #      requires: [build-frontend]
-    #  - test-backend:
-    #      requires: [build-backend]
-    #  - scan-backend:
-    #      requires: [build-backend]
-    #  - scan-frontend:
-    #      requires: [build-frontend]
-    #  - deploy-infrastructure:
-    #      requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
     #      filters:
     #        branches:
     #          only: [master]
-    #  - configure-infrastructure:
-    #      requires: [deploy-infrastructure]
-    #  - run-migrations:
-    #      requires: [configure-infrastructure]
-    #  - deploy-frontend:
-    #      requires: [run-migrations]
-      - deploy-backend #:
-          #requires: [run-migrations]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       - smoke-test:
-          requires: [deploy-backend] #, deploy-frontend]
+          requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
       - cleanup:
