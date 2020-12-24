@@ -14,8 +14,9 @@
   shell: |
     cd /home/ubuntu/backend
     npm run build
-
-- name: "run migrations again"
+    
+# really necessary???
+- name: "run migrations"
   become: true
   shell: |
     cd /home/ubuntu/backend

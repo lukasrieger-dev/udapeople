@@ -360,14 +360,13 @@ jobs:
             curl "http://${BACKEND_URL}:3030/api/status"
       - run:
           name: Frontend smoke test.
-          # CHANGE: grep "Welcome" !!!!
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3.website.eu-central-1.amazonaws.com"
-            if curl -s ${URL} | grep "pi=3.0"
+            if curl -s ${URL} | grep "Welcome"
             then
               return 1
             else
-              return 0
+              return 1
             fi
       - destroy-environment:
           WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -410,13 +409,13 @@ jobs:
             if [ -n "${OLD_CIRCLE_WORKFLOW_ID:0:7}" ] && [[ "${STACKS[@]}" =~ "${OLD_CIRCLE_WORKFLOW_ID:0:7}" ]]
             then
               echo "deleting stacks of ${OLD_CIRCLE_WORKFLOW_ID:0:7}"
-              aws s3 rm s3://udapeople-s3bucket-${OLD_CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+              aws s3 rm s3://udapeople-${OLD_CIRCLE_WORKFLOW_ID:0:7}/ --recursive
               aws cloudformation delete-stack --stack-name udapeople-frontend-${OLD_CIRCLE_WORKFLOW_ID:0:7}
               aws cloudformation delete-stack --stack-name udapeople-backend-${OLD_CIRCLE_WORKFLOW_ID:0:7}
             fi
-      #- destroy-environment:
-          #WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      #- revert-migrations
+      - destroy-environment:
+          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations
 
 workflows:
   default:
