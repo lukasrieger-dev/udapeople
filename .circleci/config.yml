@@ -333,14 +333,14 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
 
-            ls backend
+            ls -a backend
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
           environment:
             ANSIBLE_HOST_KEY_CHECKING: false
-      - destroy-environment:
-          WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
-      - revert-migrations
+     # - destroy-environment:
+     #     WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
+     # - revert-migrations
 
   smoke-test:
     docker:
