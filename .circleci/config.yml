@@ -382,7 +382,7 @@ jobs:
             STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter UPDATE_COMPLETE CREATE_COMPLETE --output text)
             echo STACKS=${STACKS}
             echo "Update CloudFront"
-            aws cloudformation update-stack \
+            aws cloudformation deploy \
               --stack-name Udapeople-Cloudfront \
               --template-file .circleci/files/cloudfront.yml \
               --region ${AWS_DEFAULT_REGION} \
