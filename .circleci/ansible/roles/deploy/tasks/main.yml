@@ -14,13 +14,6 @@
   shell: |
     cd /home/ubuntu/backend
     npm run build
-    
-# really necessary???
-- name: "run migrations"
-  become: true
-  shell: |
-    cd /home/ubuntu/backend
-    npm run migrations
 
 - name: run server
   become: true
