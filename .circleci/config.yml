@@ -230,7 +230,7 @@ jobs:
           command: |
             cd backend
 
-            echo ENVIROMENT=production > ".env"
+            echo ENVIROMENT=development > ".env"
             echo TYPEORM_CONNECTION=postgres >> ".env"
             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> ".env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> ".env"
@@ -280,14 +280,11 @@ jobs:
             sudo apt-get -y -qq install python3
             sudo apt-get -qq install awscli
       - run:
-          name: Get backend url
+          name: Deploy frontend objects
           command: |
             BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
             export API_URL=http://${BACKEND_URL}:3030
             echo ${API_URL}
-      - run:
-          name: Deploy frontend objects
-          command: |
             cd frontend
             npm install
             npm run build
@@ -322,10 +319,7 @@ jobs:
           command: |
             tar -C backend -czvf artifact.tar.gz .
 
-            BACKEND_URL=$(curl -H "token: ${CIRCLE_WORKFLOW_ID:0:7}" --request GET https://api.memstash.io/values/backend_url)
-            
-            echo API_URL=http://${BACKEND_URL}:3030 > "backend.env"
-            echo ENVIROMENT=production > "backend/.env"
+            echo ENVIROMENT=development > "backend/.env"
             echo TYPEORM_CONNECTION=postgres >> "backend/.env"
             echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
             echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
@@ -336,7 +330,6 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             
-
             ls -a backend
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
