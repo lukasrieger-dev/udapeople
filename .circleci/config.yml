@@ -13,7 +13,7 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name udapeople-backend-<<parameters.WorkflowID>>
             aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.WorkflowID>>
-            aws s3 rb s3://${CIRCLE_WORKFLOW_ID:0:7} --force
+            aws s3 rb s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --force
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -297,7 +297,7 @@ jobs:
             npm audit fix
             npm run build
             ls -la
-            aws s3 cp dist s3://${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}/ --recursive
       - destroy-environment:
           WorkflowID: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations
@@ -363,7 +363,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://${CIRCLE_WORKFLOW_ID:0:7}.s3.website.eu-central-1.amazonaws.com"
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3.website.eu-central-1.amazonaws.com"
             if curl -s ${URL} | grep "Welcome"
             then
               return 1
@@ -393,14 +393,12 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
 
-            OLD_CIRCLE_WORKFLOW_ID=$(aws cloudformation list-exports --query "Exports[?Name=='CircleCI-WorkflowID'].Value" --output text)
-            echo OLD_CIRCLE_WORKFLOW_ID=${OLD_CIRCLE_WORKFLOW_ID:0:7}
             STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter UPDATE_COMPLETE CREATE_COMPLETE --output text)
             echo STACKS=${STACKS}
             if [ -n "${OLD_CIRCLE_WORKFLOW_ID:0:7}" ] && [[ "${STACKS[@]}" =~ "${OLD_CIRCLE_WORKFLOW_ID:0:7}" ]]
             then
               echo "deleting stacks of ${OLD_CIRCLE_WORKFLOW_ID:0:7}"
-              aws s3 rm s3://${OLD_CIRCLE_WORKFLOW_ID:0:7}/ --recursive
+              aws s3 rm s3://udapeople-${OLD_CIRCLE_WORKFLOW_ID:0:7}/ --recursive
               aws cloudformation delete-stack --stack-name udapeople-frontend-${OLD_CIRCLE_WORKFLOW_ID:0:7}
               aws cloudformation delete-stack --stack-name udapeople-backend-${OLD_CIRCLE_WORKFLOW_ID:0:7}
             fi
