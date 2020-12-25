@@ -331,7 +331,7 @@ jobs:
             
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
-            ls -a backend
+
           environment:
             ANSIBLE_HOST_KEY_CHECKING: false
       - destroy-environment:
